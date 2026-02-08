@@ -268,50 +268,78 @@ function importProgress(file) {
 // ==================== 摘要图生成 ====================
 
 /**
- * 在 Canvas 上绘制未贴金 Joker 摘要图
- * 按稀有度分栏展示，暗黑风格
+ * 加载单张图片，返回 Promise
+ * 设置 crossOrigin 以支持 Canvas 导出
  */
-function generateSnapshot() {
+function loadImage(src) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null); // 加载失败返回 null
+        img.src = src;
+    });
+}
+
+/**
+ * 在 Canvas 上绘制未贴金 Joker 摘要图（卡面图片版）
+ * 按稀有度分栏，紧凑缩略图网格，不显示名称
+ */
+async function generateSnapshot() {
     const canvas = document.getElementById('snapshot-canvas');
     const ctx = canvas.getContext('2d');
+    const snapshotBtn = document.getElementById('btn-snapshot');
+
+    // 显示加载状态
+    snapshotBtn.disabled = true;
+    snapshotBtn.innerHTML = '<span class="btn-icon">⏳</span> Loading...';
 
     // 收集未贴金数据，按稀有度分组
     const rarities = [
-        { name: 'Common', color: '#4a9eff', dotColor: '#4a9eff' },
-        { name: 'Uncommon', color: '#4ade80', dotColor: '#4ade80' },
-        { name: 'Rare', color: '#f43f5e', dotColor: '#f43f5e' },
-        { name: 'Legendary', color: '#a855f7', dotColor: '#a855f7' },
+        { name: 'Common', color: '#4a9eff' },
+        { name: 'Uncommon', color: '#4ade80' },
+        { name: 'Rare', color: '#f43f5e' },
+        { name: 'Legendary', color: '#a855f7' },
     ];
 
     const ungildedByRarity = {};
     let totalUngilded = 0;
+    const allUngildedJokers = [];
     rarities.forEach(r => {
         const list = JOKERS.filter(j => j.rarity === r.name && !gildedSet.has(j.name));
         ungildedByRarity[r.name] = list;
         totalUngilded += list.length;
+        allUngildedJokers.push(...list);
     });
 
-    // Canvas 尺寸计算
-    const W = 800;
-    const PADDING = 30;
-    const TITLE_H = 80;
-    const PROGRESS_H = 40;
-    const SECTION_HEADER_H = 36;
-    const ITEM_H = 22;
-    const COLS = 2; // 每个稀有度分栏内分 2 列
-    const COL_W = (W - PADDING * 2) / COLS;
-    const GAP_BETWEEN_SECTIONS = 20;
+    // 预加载所有未贴金 Joker 的图片
+    const imageMap = new Map();
+    const imagePromises = allUngildedJokers.map(async (joker) => {
+        const img = await loadImage(joker.imgSrc);
+        imageMap.set(joker.name, img);
+    });
+    await Promise.all(imagePromises);
+
+    // 图片尺寸和布局参数
+    const IMG_W = 52;
+    const IMG_H = 73; // 保持 5:7 比例
+    const IMG_GAP = 6;
+    const W = 860;
+    const PADDING = 25;
+    const COLS_PER_ROW = Math.floor((W - PADDING * 2 + IMG_GAP) / (IMG_W + IMG_GAP));
+    const SECTION_HEADER_H = 38;
+    const GAP_BETWEEN_SECTIONS = 16;
 
     // 计算总高度
-    let totalH = PADDING + TITLE_H + PROGRESS_H + 10;
+    let totalH = 25 + 70 + 40 + 10; // 顶部padding + 标题 + 进度条 + 间距
     rarities.forEach(r => {
         const count = ungildedByRarity[r.name].length;
         if (count > 0) {
-            const rows = Math.ceil(count / COLS);
-            totalH += SECTION_HEADER_H + rows * ITEM_H + GAP_BETWEEN_SECTIONS;
+            const rows = Math.ceil(count / COLS_PER_ROW);
+            totalH += SECTION_HEADER_H + rows * (IMG_H + IMG_GAP) + GAP_BETWEEN_SECTIONS;
         }
     });
-    totalH += PADDING + 30; // 底部留白 + 水印
+    totalH += 30 + 20; // 底部水印 + 留白
 
     // 设置 Canvas 尺寸
     canvas.width = W;
@@ -330,16 +358,16 @@ function generateSnapshot() {
     ctx.fillRect(0, 0, W, 2);
 
     // 标题
-    let y = PADDING + 10;
+    let y = 30;
     ctx.fillStyle = '#f5c842';
-    ctx.font = 'bold 24px Inter, sans-serif';
+    ctx.font = 'bold 22px Inter, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('🃏 Balatro Gilding Tracker', W / 2, y);
-    y += 30;
+    y += 26;
     ctx.fillStyle = '#8899aa';
-    ctx.font = '14px Inter, sans-serif';
-    ctx.fillText('Perfectionist++ — Ungilded Jokers Checklist', W / 2, y);
-    y += 30;
+    ctx.font = '13px Inter, sans-serif';
+    ctx.fillText('Perfectionist++ — Ungilded Jokers', W / 2, y);
+    y += 28;
 
     // 进度条
     const gilded = gildedSet.size;
@@ -347,21 +375,20 @@ function generateSnapshot() {
     const percent = Math.round((gilded / total) * 100);
     const barX = PADDING;
     const barW = W - PADDING * 2;
-    const barH = 14;
+    const barH = 12;
 
-    // 进度文本
     ctx.textAlign = 'left';
     ctx.fillStyle = '#8899aa';
-    ctx.font = '12px Inter, sans-serif';
-    ctx.fillText(`Progress: ${gilded} / ${total} (${percent}%)`, barX, y);
+    ctx.font = '11px Inter, sans-serif';
+    ctx.fillText(`${gilded} / ${total} gilded (${percent}%)`, barX, y);
     ctx.textAlign = 'right';
     ctx.fillText(`${totalUngilded} remaining`, W - PADDING, y);
-    y += 8;
+    y += 6;
 
     // 进度条底
     ctx.fillStyle = '#1a2332';
     ctx.beginPath();
-    ctx.roundRect(barX, y, barW, barH, 7);
+    ctx.roundRect(barX, y, barW, barH, 6);
     ctx.fill();
 
     // 进度条填充
@@ -372,13 +399,13 @@ function generateSnapshot() {
         barGrad.addColorStop(1, '#f5c842');
         ctx.fillStyle = barGrad;
         ctx.beginPath();
-        ctx.roundRect(barX, y, Math.max(fillW, 10), barH, 7);
+        ctx.roundRect(barX, y, Math.max(fillW, 8), barH, 6);
         ctx.fill();
     }
 
-    y += barH + GAP_BETWEEN_SECTIONS + 5;
+    y += barH + 16;
 
-    // 按稀有度分栏绘制
+    // 按稀有度分栏绘制卡面图片
     ctx.textAlign = 'left';
     rarities.forEach(r => {
         const jokers = ungildedByRarity[r.name];
@@ -390,47 +417,72 @@ function generateSnapshot() {
         ctx.roundRect(PADDING, y, W - PADDING * 2, SECTION_HEADER_H - 4, 6);
         ctx.fill();
 
-        // 稀有度圆点
-        ctx.fillStyle = r.dotColor;
+        // 稀有度左边彩色竖条
+        ctx.fillStyle = r.color;
         ctx.beginPath();
-        ctx.arc(PADDING + 16, y + (SECTION_HEADER_H - 4) / 2, 5, 0, Math.PI * 2);
+        ctx.roundRect(PADDING, y, 4, SECTION_HEADER_H - 4, [6, 0, 0, 6]);
+        ctx.fill();
+
+        // 稀有度圆点
+        ctx.beginPath();
+        ctx.arc(PADDING + 18, y + (SECTION_HEADER_H - 4) / 2, 5, 0, Math.PI * 2);
         ctx.fill();
 
         // 稀有度名称
         ctx.fillStyle = r.color;
         ctx.font = 'bold 14px Inter, sans-serif';
-        ctx.fillText(r.name, PADDING + 28, y + 21);
+        ctx.fillText(r.name, PADDING + 30, y + 23);
 
         // 数量
         ctx.fillStyle = '#5a6a7a';
         ctx.font = '12px Inter, sans-serif';
         ctx.textAlign = 'right';
-        ctx.fillText(`${jokers.length}`, W - PADDING - 10, y + 21);
+        ctx.fillText(`${jokers.length}`, W - PADDING - 10, y + 23);
         ctx.textAlign = 'left';
 
         y += SECTION_HEADER_H;
 
-        // 列出 Joker 名称（2 列布局）
+        // 绘制卡面图片网格
         jokers.forEach((joker, i) => {
-            const col = i % COLS;
-            const row = Math.floor(i / COLS);
-            const itemX = PADDING + 8 + col * COL_W;
-            const itemY = y + row * ITEM_H;
+            const col = i % COLS_PER_ROW;
+            const row = Math.floor(i / COLS_PER_ROW);
+            const imgX = PADDING + col * (IMG_W + IMG_GAP);
+            const imgY = y + row * (IMG_H + IMG_GAP);
 
-            // 名称前面的小方块颜色标记
-            ctx.fillStyle = r.dotColor;
-            ctx.globalAlpha = 0.3;
-            ctx.fillRect(itemX, itemY + 4, 3, 12);
-            ctx.globalAlpha = 1;
+            const img = imageMap.get(joker.name);
+            if (img) {
+                // 绘制卡片背景（圆角矩形遮罩）
+                ctx.save();
+                ctx.beginPath();
+                ctx.roundRect(imgX, imgY, IMG_W, IMG_H, 4);
+                ctx.clip();
+                ctx.drawImage(img, imgX, imgY, IMG_W, IMG_H);
+                ctx.restore();
 
-            // Joker 名称
-            ctx.fillStyle = '#e8edf4';
-            ctx.font = '12px Inter, sans-serif';
-            ctx.fillText(joker.name, itemX + 10, itemY + 14);
+                // 细边框
+                ctx.strokeStyle = r.color;
+                ctx.globalAlpha = 0.4;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.roundRect(imgX, imgY, IMG_W, IMG_H, 4);
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            } else {
+                // 图片加载失败：绘制占位符
+                ctx.fillStyle = '#1a2332';
+                ctx.beginPath();
+                ctx.roundRect(imgX, imgY, IMG_W, IMG_H, 4);
+                ctx.fill();
+                ctx.fillStyle = '#5a6a7a';
+                ctx.font = '8px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(joker.name, imgX + IMG_W / 2, imgY + IMG_H / 2 + 3);
+                ctx.textAlign = 'left';
+            }
         });
 
-        const rows = Math.ceil(jokers.length / COLS);
-        y += rows * ITEM_H + GAP_BETWEEN_SECTIONS;
+        const rows = Math.ceil(jokers.length / COLS_PER_ROW);
+        y += rows * (IMG_H + IMG_GAP) + GAP_BETWEEN_SECTIONS;
     });
 
     // 如果没有未贴金的牌
@@ -438,15 +490,18 @@ function generateSnapshot() {
         ctx.fillStyle = '#f5c842';
         ctx.font = 'bold 20px Inter, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('🏆 All 150 Jokers Gilded! Perfectionist++ Complete!', W / 2, y + 20);
-        y += 50;
+        ctx.fillText('🏆 All 150 Jokers Gilded!', W / 2, y + 20);
     }
 
     // 底部水印
     ctx.fillStyle = '#3a4a5a';
     ctx.font = '10px Inter, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(`Generated on ${new Date().toLocaleDateString()} · geumjin99.github.io/balatro-gilding-tracker`, W / 2, totalH - 12);
+    ctx.fillText(`Generated ${new Date().toLocaleDateString()} · geumjin99.github.io/balatro-gilding-tracker`, W / 2, totalH - 10);
+
+    // 恢复按钮状态
+    snapshotBtn.disabled = false;
+    snapshotBtn.innerHTML = '<span class="btn-icon">📸</span> Snapshot';
 
     // 显示 modal
     document.getElementById('snapshot-modal').classList.add('active');
@@ -454,13 +509,18 @@ function generateSnapshot() {
 
 /**
  * 下载摘要图为 PNG
+ * 如果 Canvas 因跨域被污染，提示用户右键另存或截图
  */
 function downloadSnapshot() {
     const canvas = document.getElementById('snapshot-canvas');
-    const link = document.createElement('a');
-    link.download = `balatro-ungilded-${new Date().toISOString().slice(0, 10)}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
+    try {
+        const link = document.createElement('a');
+        link.download = `balatro-ungilded-${new Date().toISOString().slice(0, 10)}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    } catch (e) {
+        alert('⚠️ Unable to export due to cross-origin restrictions.\nPlease right-click the image and choose "Save Image As", or take a screenshot.');
+    }
 }
 
 // ==================== 事件绑定 ====================
