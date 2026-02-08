@@ -35,7 +35,9 @@
 }
 
 /* --- 全局样式 --- */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -177,7 +179,8 @@ body {
   flex-wrap: wrap;
 }
 
-.toolbar-left, .toolbar-right {
+.toolbar-left,
+.toolbar-right {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
@@ -225,8 +228,101 @@ body {
   border-color: var(--border-hover);
 }
 
+.btn-gold {
+  background: linear-gradient(135deg, #3d2e0a, #5c4415);
+  color: var(--gold);
+  border-color: rgba(245, 200, 66, 0.35);
+}
+
+.btn-gold:hover {
+  background: linear-gradient(135deg, #5c4415, #7a5c1e);
+  border-color: var(--gold);
+  box-shadow: 0 0 14px var(--gold-glow);
+}
+
+/* --- Modal 弹窗 --- */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal-content {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-header h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0.3rem;
+  transition: color var(--transition);
+}
+
+.modal-close:hover {
+  color: var(--text-primary);
+}
+
+.modal-body {
+  overflow: auto;
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.modal-body canvas {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+}
+
+.modal-footer {
+  padding: 0.8rem 1.5rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
 /* --- Section 通用 --- */
-.dashboard, .collection {
+.dashboard,
+.collection {
   padding: 1rem 1.5rem 2rem;
   max-width: 1400px;
   margin: 0 auto;
@@ -286,10 +382,25 @@ body {
   display: inline-block;
 }
 
-.rarity-dot.common { background: var(--common); box-shadow: 0 0 6px var(--common); }
-.rarity-dot.uncommon { background: var(--uncommon); box-shadow: 0 0 6px var(--uncommon); }
-.rarity-dot.rare { background: var(--rare); box-shadow: 0 0 6px var(--rare); }
-.rarity-dot.legendary { background: var(--legendary); box-shadow: 0 0 6px var(--legendary); }
+.rarity-dot.common {
+  background: var(--common);
+  box-shadow: 0 0 6px var(--common);
+}
+
+.rarity-dot.uncommon {
+  background: var(--uncommon);
+  box-shadow: 0 0 6px var(--uncommon);
+}
+
+.rarity-dot.rare {
+  background: var(--rare);
+  box-shadow: 0 0 6px var(--rare);
+}
+
+.rarity-dot.legendary {
+  background: var(--legendary);
+  box-shadow: 0 0 6px var(--legendary);
+}
 
 .rarity-count {
   margin-left: auto;
@@ -333,10 +444,21 @@ body {
 }
 
 /* 稀有度边框颜色 */
-.joker-card.rarity-common { border-left: 3px solid var(--common); }
-.joker-card.rarity-uncommon { border-left: 3px solid var(--uncommon); }
-.joker-card.rarity-rare { border-left: 3px solid var(--rare); }
-.joker-card.rarity-legendary { border-left: 3px solid var(--legendary); }
+.joker-card.rarity-common {
+  border-left: 3px solid var(--common);
+}
+
+.joker-card.rarity-uncommon {
+  border-left: 3px solid var(--uncommon);
+}
+
+.joker-card.rarity-rare {
+  border-left: 3px solid var(--rare);
+}
+
+.joker-card.rarity-legendary {
+  border-left: 3px solid var(--legendary);
+}
 
 /* 已贴金标记 */
 .joker-card.gilded {
@@ -418,10 +540,25 @@ body {
   border-radius: 999px;
 }
 
-.joker-rarity.common { color: var(--common); background: rgba(74, 158, 255, 0.1); }
-.joker-rarity.uncommon { color: var(--uncommon); background: rgba(74, 222, 128, 0.1); }
-.joker-rarity.rare { color: var(--rare); background: rgba(244, 63, 94, 0.1); }
-.joker-rarity.legendary { color: var(--legendary); background: rgba(168, 85, 247, 0.1); }
+.joker-rarity.common {
+  color: var(--common);
+  background: rgba(74, 158, 255, 0.1);
+}
+
+.joker-rarity.uncommon {
+  color: var(--uncommon);
+  background: rgba(74, 222, 128, 0.1);
+}
+
+.joker-rarity.rare {
+  color: var(--rare);
+  background: rgba(244, 63, 94, 0.1);
+}
+
+.joker-rarity.legendary {
+  color: var(--legendary);
+  background: rgba(168, 85, 247, 0.1);
+}
 
 /* 提示板里的卡片 - 点击移除按钮 */
 .dashboard .joker-card:hover::after {
@@ -561,8 +698,15 @@ body {
 
 /* --- 动画 --- */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .joker-card {
@@ -571,9 +715,17 @@ body {
 
 /* 贴金成功闪光动画 */
 @keyframes gildFlash {
-  0% { box-shadow: 0 0 0 0 var(--gold-glow); }
-  50% { box-shadow: 0 0 20px 8px var(--gold-glow); }
-  100% { box-shadow: 0 0 0 0 transparent; }
+  0% {
+    box-shadow: 0 0 0 0 var(--gold-glow);
+  }
+
+  50% {
+    box-shadow: 0 0 20px 8px var(--gold-glow);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
 }
 
 .gild-flash {
@@ -605,7 +757,8 @@ body {
     align-items: stretch;
   }
 
-  .toolbar-left, .toolbar-right {
+  .toolbar-left,
+  .toolbar-right {
     justify-content: center;
   }
 

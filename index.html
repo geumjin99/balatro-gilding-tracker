@@ -51,6 +51,9 @@
                 </button>
             </div>
             <div class="toolbar-right">
+                <button class="btn btn-gold" id="btn-snapshot" title="生成未贴金清单摘要图">
+                    <span class="btn-icon">📸</span> Snapshot
+                </button>
                 <button class="btn btn-primary" id="btn-export" title="导出进度为 JSON 文件">
                     <span class="btn-icon">📤</span> Export
                 </button>
@@ -69,7 +72,8 @@
             <span class="dashboard-count" id="dashboard-count">(0)</span>
         </h2>
         <p class="section-desc">These are the Jokers you still need to gild. Click a card to mark it as
-            <strong>gilded</strong> and remove it from the board.</p>
+            <strong>gilded</strong> and remove it from the board.
+        </p>
 
         <!-- 4 个稀有度分栏 -->
         <div class="rarity-section" id="section-common">
@@ -114,7 +118,8 @@
             <span class="section-icon">📚</span> All Jokers Collection
         </h2>
         <p class="section-desc">Click a card to toggle it as <strong>ungilded</strong> (add to dashboard) or
-            <strong>gilded</strong> (remove from dashboard).</p>
+            <strong>gilded</strong> (remove from dashboard).
+        </p>
 
         <!-- 搜索和筛选 -->
         <div class="filter-bar">
@@ -142,6 +147,24 @@
             · <a href="https://github.com/geumjin99/balatro-gilding-tracker" target="_blank">GitHub</a>
         </p>
     </footer>
+
+    <!-- 摘要图预览 Modal -->
+    <div class="modal-overlay" id="snapshot-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📸 Ungilded Jokers Snapshot</h3>
+                <button class="modal-close" id="modal-close">✕</button>
+            </div>
+            <div class="modal-body">
+                <canvas id="snapshot-canvas"></canvas>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-gold" id="btn-download-img">
+                    <span class="btn-icon">💾</span> Save as PNG
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script src="jokers.js"></script>
     <script src="app.js"></script>
