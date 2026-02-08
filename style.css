@@ -3,6 +3,16 @@
    暗黑主题 + Balatro 风格
    =========================== */
 
+/* --- 广告位 --- */
+.ad-slot {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0.5rem 1.5rem;
+  min-height: 0;
+  /* 无广告时不占空间 */
+  text-align: center;
+}
+
 /* --- CSS 变量 --- */
 :root {
   --bg-primary: #0a0e14;
