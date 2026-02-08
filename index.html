@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Balatro Gilding Tracker - Track your Perfectionist++ achievement progress. Mark gilded Jokers and see which ones you still need.">
+    <title>Balatro Gilding Tracker | Perfectionist++</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- 顶部标题栏 -->
+    <header class="header">
+        <div class="header-content">
+            <h1 class="logo">
+                <span class="logo-icon">🃏</span>
+                <span>Balatro <span class="gold-text">Gilding</span> Tracker</span>
+            </h1>
+            <p class="subtitle">Perfectionist++ Achievement Helper</p>
+        </div>
+    </header>
+
+    <!-- 进度条区域 -->
+    <section class="progress-section">
+        <div class="progress-container">
+            <div class="progress-info">
+                <span class="progress-label">Gilding Progress</span>
+                <span class="progress-count" id="progress-count">0 / 150</span>
+            </div>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progress-bar" style="width: 0%"></div>
+            </div>
+            <div class="progress-percentage" id="progress-percentage">0%</div>
+        </div>
+    </section>
+
+    <!-- 工具栏 -->
+    <section class="toolbar">
+        <div class="toolbar-content">
+            <div class="toolbar-left">
+                <button class="btn btn-secondary" id="btn-select-all" title="标记全部为未贴金">
+                    <span class="btn-icon">📋</span> Select All Ungilded
+                </button>
+                <button class="btn btn-secondary" id="btn-clear-all" title="清除所有选择">
+                    <span class="btn-icon">🗑️</span> Clear All
+                </button>
+            </div>
+            <div class="toolbar-right">
+                <button class="btn btn-primary" id="btn-export" title="导出进度为 JSON 文件">
+                    <span class="btn-icon">📤</span> Export
+                </button>
+                <label class="btn btn-primary" title="从 JSON 文件导入进度">
+                    <span class="btn-icon">📥</span> Import
+                    <input type="file" id="btn-import" accept=".json" hidden>
+                </label>
+            </div>
+        </div>
+    </section>
+
+    <!-- 提示板（待贴金 Jokers，按稀有度分栏） -->
+    <section class="dashboard" id="dashboard">
+        <h2 class="section-title">
+            <span class="section-icon">🎯</span> Ungilded Jokers Dashboard
+            <span class="dashboard-count" id="dashboard-count">(0)</span>
+        </h2>
+        <p class="section-desc">These are the Jokers you still need to gild. Click a card to mark it as
+            <strong>gilded</strong> and remove it from the board.</p>
+
+        <!-- 4 个稀有度分栏 -->
+        <div class="rarity-section" id="section-common">
+            <h3 class="rarity-header rarity-common">
+                <span class="rarity-dot common"></span> Common
+                <span class="rarity-count" id="count-common">0</span>
+            </h3>
+            <div class="card-grid" id="grid-common"></div>
+        </div>
+        <div class="rarity-section" id="section-uncommon">
+            <h3 class="rarity-header rarity-uncommon">
+                <span class="rarity-dot uncommon"></span> Uncommon
+                <span class="rarity-count" id="count-uncommon">0</span>
+            </h3>
+            <div class="card-grid" id="grid-uncommon"></div>
+        </div>
+        <div class="rarity-section" id="section-rare">
+            <h3 class="rarity-header rarity-rare">
+                <span class="rarity-dot rare"></span> Rare
+                <span class="rarity-count" id="count-rare">0</span>
+            </h3>
+            <div class="card-grid" id="grid-rare"></div>
+        </div>
+        <div class="rarity-section" id="section-legendary">
+            <h3 class="rarity-header rarity-legendary">
+                <span class="rarity-dot legendary"></span> Legendary
+                <span class="rarity-count" id="count-legendary">0</span>
+            </h3>
+            <div class="card-grid" id="grid-legendary"></div>
+        </div>
+
+        <div class="empty-state" id="empty-dashboard">
+            <div class="empty-icon">🏆</div>
+            <p>No ungilded Jokers selected yet!</p>
+            <p class="empty-hint">Scroll down to the Joker collection and add the ones you haven't gilded.</p>
+        </div>
+    </section>
+
+    <!-- 全部 Joker 卡库 -->
+    <section class="collection">
+        <h2 class="section-title">
+            <span class="section-icon">📚</span> All Jokers Collection
+        </h2>
+        <p class="section-desc">Click a card to toggle it as <strong>ungilded</strong> (add to dashboard) or
+            <strong>gilded</strong> (remove from dashboard).</p>
+
+        <!-- 搜索和筛选 -->
+        <div class="filter-bar">
+            <div class="search-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search-input" placeholder="Search Jokers..." class="search-input">
+            </div>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-rarity="all">All (150)</button>
+                <button class="filter-btn" data-rarity="Common">Common</button>
+                <button class="filter-btn" data-rarity="Uncommon">Uncommon</button>
+                <button class="filter-btn" data-rarity="Rare">Rare</button>
+                <button class="filter-btn" data-rarity="Legendary">Legendary</button>
+            </div>
+        </div>
+
+        <div class="card-grid" id="collection-grid"></div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <p>Made with ❤️ for Balatro players chasing <strong>Perfectionist++</strong></p>
+        <p class="footer-links">
+            Data from <a href="https://balatrogame.fandom.com/wiki/Jokers" target="_blank">Balatro Wiki</a>
+            · <a href="https://github.com/geumjin99/balatro-gilding-tracker" target="_blank">GitHub</a>
+        </p>
+    </footer>
+
+    <script src="jokers.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
