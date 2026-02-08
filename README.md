@@ -14,7 +14,7 @@ A web-based tracker for the **Perfectionist++** achievement in [Balatro](https:/
 
 ## 🚀 Live Demo
 
-👉 [https://geumjin99.github.io/balatro-gilding-tracker/](https://geumjin99.github.io/balatro-gilding-tracker/)
+👉 [https://balatro-gilding.com](https://balatro-gilding.com)
 
 ## 🎮 How to Use
 
